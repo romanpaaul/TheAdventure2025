@@ -110,4 +110,20 @@ public unsafe class GameRenderer
     {
         _sdl.RenderPresent(_renderer);
     }
+
+    // New methods for pause overlay rendering
+    public void FillRect(Rectangle<int> rect)
+    {
+        _sdl.RenderFillRect(_renderer, in rect);
+    }
+
+    public void DrawRect(Rectangle<int> rect)
+    {
+        _sdl.RenderDrawRect(_renderer, in rect);
+    }
+
+    public (int Width, int Height) GetScreenSize()
+    {
+        return _window.Size;
+    }
 }

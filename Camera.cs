@@ -7,6 +7,7 @@ public class Camera
     private int _x;
     private int _y;
     private Rectangle<int> _worldBounds = new();
+    private bool _hasWorldBounds = false;
 
     public int X => _x;
     public int Y => _y;
@@ -24,32 +25,45 @@ public class Camera
     {
         var marginLeft = Width / 2;
         var marginTop = Height / 2;
-        
-        if (marginLeft * 2 > bounds.Size.X)
+
+        if (bounds.Size.X > Width && bounds.Size.Y > Height)
         {
-            marginLeft = 48;
+            _worldBounds = new Rectangle<int>(
+                bounds.Origin.X + marginLeft, 
+                bounds.Origin.Y + marginTop, 
+                bounds.Size.X - marginLeft * 2,
+                bounds.Size.Y - marginTop * 2
+            );
+            _hasWorldBounds = true;
+        }
+        else
+        {
+            _hasWorldBounds = false;
         }
         
-        if (marginTop * 2 > bounds.Size.Y)
-        {
-            marginTop = 48;
-        }
-        
-        _worldBounds = new Rectangle<int>(marginLeft, marginTop, bounds.Size.X - marginLeft * 2,
-            bounds.Size.Y - marginTop * 2);
         _x = marginLeft;
         _y = marginTop;
     }
     
     public void LookAt(int x, int y)
     {
-        if (_worldBounds.Contains(new Vector2D<int>(_x, y)))
+        if (_hasWorldBounds)
         {
-            _y = y;
+            if (_worldBounds.Contains(new Vector2D<int>(x, y)))
+            {
+                _x = x;
+                _y = y;
+            }
+            else
+            {
+                _x = Math.Max(_worldBounds.Origin.X, Math.Min(x, _worldBounds.Origin.X + _worldBounds.Size.X));
+                _y = Math.Max(_worldBounds.Origin.Y, Math.Min(y, _worldBounds.Origin.Y + _worldBounds.Size.Y));
+            }
         }
-        if (_worldBounds.Contains(new Vector2D<int>(x, _y)))
+        else
         {
             _x = x;
+            _y = y;
         }
     }
 
