@@ -5,6 +5,8 @@ namespace TheAdventure;
 public unsafe class Input
 {
     private readonly Sdl _sdl;
+    private bool _escapePressed = false;
+    private bool _lastEscapeState = false;
 
     public EventHandler<(int x, int y)>? OnMouseClick;
 
@@ -49,6 +51,17 @@ public unsafe class Input
         return _keyboardState[(int)KeyCode.B] == 1;
     }
 
+    public bool IsEscapePressed()
+    {
+        ReadOnlySpan<byte> keyboardState = new(_sdl.GetKeyboardState(null), (int)KeyCode.Count);
+        bool currentEscapeState = keyboardState[(int)KeyCode.Escape] == 1;
+        
+        bool wasJustPressed = currentEscapeState && !_lastEscapeState;
+        _lastEscapeState = currentEscapeState;
+        
+        return wasJustPressed;
+    }
+
     public bool ProcessInput()
     {
         Event ev = new Event();
@@ -61,6 +74,15 @@ public unsafe class Input
 
             switch (ev.Type)
             {
+                case (uint)EventType.Keydown:
+                {
+                    if (ev.Key.Keysym.Sym == (uint)KeyCode.Escape)
+                    {
+                        break;
+                    }
+                    break;
+                }
+                    
                 case (uint)EventType.Windowevent:
                 {
                     switch (ev.Window.Event)
@@ -156,11 +178,6 @@ public unsafe class Input
                 }
 
                 case (uint)EventType.Keyup:
-                {
-                    break;
-                }
-
-                case (uint)EventType.Keydown:
                 {
                     break;
                 }
